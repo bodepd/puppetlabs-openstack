@@ -1,3 +1,16 @@
+$searched_db_servers = search_nodes({'classes' => 'nova::db' })
+$searched_rabbitmq_servers = search({'classes' => 'nova::rabbitmq' })
+$searched_glance_servers = search({'classes' => 'nova::rabbitmq' })
+$searched_api_servers = search({'classes' => 'nova::api' })
+
+$foo = inline_template("<% 
+  puts "db servers: #{searched_db_servers.inspect}"
+  puts "rabbitmq servers: #{searched_rabbitmq_servers.inspect}"
+  puts "glance servers: #{searched_glance_servers.inspect}"
+  puts "api_servers: #{searched_api_servers.inspect}"
+%>")
+
+
 $db_host     = 'db'
 $db_username = 'nova'
 $db_name     = 'nova'
@@ -128,7 +141,7 @@ node puppetmaster {
     storeconfigs_dbadapter  => 'mysql',
     storeconfigs_dbserver   => 'localhost',
     storeconfigs_dbsocket   => '/var/run/mysqld/mysqld.sock',
-    version                 => installed,
+    version                 => '2.7.1',
     puppet_master_package   => 'puppet',
     package_provider        => 'gem',
     autosign                => 'true',

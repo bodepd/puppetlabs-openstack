@@ -72,6 +72,13 @@ Usage
 Installing With Vagrant
 ------------------------
 
+Setup
+-----
+
+Download your glance images
+
+
+
 These examples assume that you have a suitable image that you can
 use for testing.
 
@@ -93,9 +100,9 @@ This will install all of the currently supported openstack components into a sin
 
 run the rake task:
 
-    $ rake build:all
+    $ rake build:single
 
-    $ 
+    $ rake test:single
 
 Author
 ------

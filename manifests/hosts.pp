@@ -1,4 +1,8 @@
 Host { ensure => present }
+package { 'puppet':
+  provider => 'gem',
+  ensure   => '2.7.1',
+}
 host { 'puppetmaster':
   ip => '172.21.0.10',
 }
