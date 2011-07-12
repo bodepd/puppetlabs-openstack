@@ -1,3 +1,3 @@
 #!/bin/bash
-bash /vagrant/scripts/run.sh rabbitmq
+bash /vagrant/scripts/runagent.sh rabbitmq
 

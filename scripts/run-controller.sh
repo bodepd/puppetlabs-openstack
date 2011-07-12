@@ -1,3 +1,3 @@
 #!/bin/bash
-bash /vagrant/scripts/run.sh controller
+bash /vagrant/scripts/runagent.sh controller
 

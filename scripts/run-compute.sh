@@ -1,2 +1,2 @@
 #!/bin/bash
-bash /vagrant/scripts/run.sh compute
+bash /vagrant/scripts/runagent.sh compute

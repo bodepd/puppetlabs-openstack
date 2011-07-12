@@ -1,2 +1,2 @@
 #!/bin/bash
-bash /vagrant/scripts/run.sh all
+bash /vagrant/scripts/runagent.sh all
