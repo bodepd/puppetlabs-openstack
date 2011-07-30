@@ -13,7 +13,7 @@ Vagrant::Config.run do |config|
   config.vm.box = "#{box}"
   config.vm.box_url = "http://faro.puppetlabs.lan/vagrant/#{box}.vbox"
   config.vm.customize do |vm|
-    vm.memory_size = 768
+    vm.memory_size = 256
     vm.cpu_count = 1
   end
 
