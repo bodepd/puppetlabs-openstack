@@ -33,7 +33,6 @@ class openstack::compute(
     rabbit_password    => $rabbit_password,
     image_service      => 'nova.image.glance.GlanceImageService',
     glance_api_servers => $glance_api_servers,
-    network_manager    => 'nova.network.manager.FlatDHCPManager',
   }
 
   class { 'nova::compute':
