@@ -18,7 +18,8 @@ repos:
     git://github.com/saz/puppet-ssh: /etc/puppet/modules/ssh
     git://github.com/puppetlabs/puppetlabs-stdlib: /etc/puppet/modules/stdlib
     git://github.com/puppetlabs/puppet-apt: /etc/puppet/modules/apt
-    git://github.com/puppetlabs/puppet-concat: /etc/puppet/modules/concat
+    git://github.com/ripienaar/puppet-concat: /etc/puppet/modules/concat
+    git://github.com/duritong/puppet-sysctl: /etc/puppet/modules/sysctl
   checkout_branches:
 #  /etc/puppet/modules/keystone: dev
 #  /etc/puppet/modules/glance: dev
