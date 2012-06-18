@@ -30,7 +30,8 @@
 #   network settings. Optioal. Defaults to {}
 # [verbose] Rahter to log services at verbose.
 # [export_resources] Rather to export resources.
-#
+# [enabled] rather services should be enabled. This parameter can be used to
+#   implement services in active-passive modes for HA. Optional. Defaults to true.
 class openstack::controller(
   # my address
   $public_address,
@@ -65,7 +66,8 @@ class openstack::controller(
   $network_config          = {},
   # I do not think that this needs a bridge?
   $verbose                 = false,
-  $export_resources        = true
+  $export_resources        = true,
+  $enabled                 = true
 ) {
 
   $glance_api_servers = "${internal_address}:9292"
@@ -98,21 +100,25 @@ class openstack::controller(
       # TODO I should make sure that this works
       # 'root_password' => $mysql_root_password,
       'bind_address'  => '0.0.0.0'
+    },
+    enabled => $enabled,
+  }
+  if ($enabled) {
+    # set up all openstack databases, users, grants
+    class { 'keystone::db::mysql':
+      password => $keystone_db_password,
     }
-  }
-  # set up all openstack databases, users, grants
-  class { 'keystone::db::mysql':
-    password => $keystone_db_password,
-  }
-  class { 'glance::db::mysql':
-    host     => '127.0.0.1',
-    password => $glance_db_password,
-  }
-  # TODO should I allow all hosts to connect?
-  class { 'nova::db::mysql':
-    password      => $nova_db_password,
-    host          => $internal_address,
-    allowed_hosts => '%',
+    Class['glance::db::mysql'] -> Class['glance::registry']
+    class { 'glance::db::mysql':
+      host     => '127.0.0.1',
+      password => $glance_db_password,
+    }
+    # TODO should I allow all hosts to connect?
+    class { 'nova::db::mysql':
+      password      => $nova_db_password,
+      host          => $internal_address,
+      allowed_hosts => '%',
+    }
   }
 
   ####### KEYSTONE ###########
@@ -126,36 +132,42 @@ class openstack::controller(
     log_verbose  => $verbose,
     log_debug    => $verbose,
     catalog_type => 'sql',
+    enabled      => $enabled,
   }
   # set up keystone database
   # set up the keystone config for mysql
   class { 'keystone::config::mysql':
     password => $keystone_db_password,
   }
-  # set up keystone admin users
-  class { 'keystone::roles::admin':
-    email    => $admin_email,
-    password => $admin_password,
-  }
-  # set up the keystone service and endpoint
-  class { 'keystone::endpoint':
-    public_address   => $public_address,
-    internal_address => $internal_address,
-    admin_address    => $admin_address,
-  }
-  # set up glance service,user,endpoint
-  class { 'glance::keystone::auth':
-    password         => $glance_user_password,
-    public_address   => $public_address,
-    internal_address => $internal_address,
-    admin_address    => $admin_address,
-  }
-  # set up nova serice,user,endpoint
-  class { 'nova::keystone::auth':
-    password         => $nova_user_password,
-    public_address   => $public_address,
-    internal_address => $internal_address,
-    admin_address    => $admin_address,
+  
+  if ($enabled) {
+    # set up keystone admin users
+    class { 'keystone::roles::admin':
+      email    => $admin_email,
+      password => $admin_password,
+    }
+    # set up the keystone service and endpoint
+    class { 'keystone::endpoint':
+      public_address   => $public_address,
+      internal_address => $internal_address,
+      admin_address    => $admin_address,
+    }
+    # set up glance service,user,endpoint
+    class { 'glance::keystone::auth':
+      password         => $glance_user_password,
+      public_address   => $public_address,
+      internal_address => $internal_address,
+      admin_address    => $admin_address,
+      before           => [Class['glance::api'], Class['glance::registry']]
+    }
+    # set up nova serice,user,endpoint
+    class { 'nova::keystone::auth':
+      password         => $nova_user_password,
+      public_address   => $public_address,
+      internal_address => $internal_address,
+      admin_address    => $admin_address,
+      before           => Class['nova::api'],
+    }
   }
 
   ######## END KEYSTONE ##########
@@ -172,7 +184,7 @@ class openstack::controller(
     keystone_tenant   => 'services',
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
-    require => Keystone_user_role["glance@services"],
+    enabled           => $enabled,
   }
   class { 'glance::backend::file': }
 
@@ -186,7 +198,7 @@ class openstack::controller(
     keystone_user     => 'glance',
     keystone_password => $glance_user_password,
     sql_connection    => "mysql://glance:${glance_db_password}@127.0.0.1/glance",
-    require           => [Class['Glance::Db::Mysql'], Keystone_user_role['glance@services']]
+    enabled           => $enabled,
   }
 
   ######## END GLANCE ###########
@@ -197,6 +209,7 @@ class openstack::controller(
   class { 'nova::rabbitmq':
     userid   => $rabbit_user,
     password => $rabbit_password,
+    enabled  => $enabled,
   }
 
   # TODO I may need to figure out if I need to set the connection information
@@ -213,7 +226,7 @@ class openstack::controller(
   }
 
   class { 'nova::api':
-    enabled           => true,
+    enabled           => $enabled,
     # TODO this should be the nova service credentials
     #admin_tenant_name => 'openstack',
     #admin_user        => 'admin',
@@ -221,7 +234,6 @@ class openstack::controller(
     admin_tenant_name => 'services',
     admin_user        => 'nova',
     admin_password    => $nova_user_password,
-    require => Keystone_user_role["nova@services"],
   }
 
   class { [
@@ -231,14 +243,18 @@ class openstack::controller(
     'nova::objectstore',
     'nova::vncproxy'
   ]:
-    enabled => true,
+    enabled => $enabled,
   }
 
   if $multi_host {
     nova_config { 'multi_host':   value => 'True'; }
     $enable_network_service = false
   } else {
-    $enable_network_service = true
+    if $enabled == true {
+      $enable_network_service = true
+    } else {
+      $enable_network_service = false
+    }
   }
 
   # set up networking
@@ -256,6 +272,8 @@ class openstack::controller(
   }
 
   ######## Horizon ########
+
+  # TOOO - what to do about HA for horizon?
 
   class { 'memcached':
     listen_ip => '127.0.0.1',
