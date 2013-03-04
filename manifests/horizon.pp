@@ -30,7 +30,8 @@ class openstack::horizon (
   $keystone_scheme       = 'http',
   $keystone_default_role = 'Member',
   $django_debug          = 'False',
-  $api_result_limit      = 1000
+  $api_result_limit      = 1000,
+  $listen_ssl            = false,
 ) {
 
   class { 'memcached':
@@ -51,5 +52,6 @@ class openstack::horizon (
     keystone_default_role => $keystone_default_role,
     django_debug          => $django_debug,
     api_result_limit      => $api_result_limit,
+    listen_ssl            => $listen_ssl,
   }
 }
