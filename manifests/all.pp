@@ -30,6 +30,7 @@
 #  [glance_db_password] The password for the db user for glance. Optional. Defaults to 'glance_pass'.
 #  [glance_user_password] The password of the glance service user. Optional. Defaults to 'glance_pass'.
 #  [secret_key] The secret key for horizon. Optional. Defaults to 'dummy_secret_key'.
+#  [horizon_listen_ssl] If horizon should listen on ssl. Optional. Defaults to false.
 #  [verbose] If the services should log verbosely. Optional. Defaults to false.
 #  [purge_nova_config] Whether unmanaged nova.conf entries should be purged. Optional. Defaults to true.
 #  [libvirt_type] The virualization type being controlled by libvirt.  Optional. Defaults to 'kvm'.
@@ -114,6 +115,7 @@ class openstack::all (
   $cache_server_port       = '11211',
   $swift                   = false,
   $horizon_app_links       = undef,
+  $horizon_listen_ssl      = false,
   # if the cinder management components should be installed
   $cinder                  = true,
   $cinder_db_user          = 'cinder',
@@ -379,6 +381,7 @@ class openstack::all (
       swift             => $swift,
       quantum           => $quantum,
       horizon_app_links => $horizon_app_links,
+      listen_ssl        => $horizon_listen_ssl,
     }
   }
 

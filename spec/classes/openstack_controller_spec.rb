@@ -404,6 +404,13 @@ describe 'openstack::controller' do
       end
       it { should_not contain_class('horizon') }
     end
+
+    describe 'when ssl is enabled' do
+      let :params do
+        default_params.merge(:horizon_listen_ssl => true)
+      end
+      it { should contain_class('horizon').with_listen_ssl(true) }
+    end
   end
 
   context 'cinder' do

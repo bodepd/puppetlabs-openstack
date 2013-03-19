@@ -34,6 +34,7 @@
 # [verbose] Whether to log services at verbose.
 # Horizon related config - assumes puppetlabs-horizon code
 # [secret_key]          secret key to encode cookies, …
+# [horizon_listen_ssl] If horizon should listen on ssl. Optional. Defaults to false.
 # [cache_server_ip]     local memcached instance ip
 # [cache_server_port]   local memcached instance port
 # [horizon]             (bool) is horizon installed. Defaults to: true
@@ -124,6 +125,7 @@ class openstack::controller (
   $cache_server_ip         = '127.0.0.1',
   $cache_server_port       = '11211',
   $horizon_app_links       = undef,
+  $horizon_listen_ssl      = false,
   $swift                   = false,
   # VNC
   $vnc_enabled             = true,
@@ -310,6 +312,7 @@ class openstack::controller (
       swift             => $swift,
       quantum           => $quantum,
       horizon_app_links => $horizon_app_links,
+      listen_ssl        => $horizon_listen_ssl,
     }
   }
 
