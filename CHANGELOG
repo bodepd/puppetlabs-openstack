@@ -1,3 +1,11 @@
+* 2013-03021 1.1.0
+- add swift to keystone class
+- update travis (add 3.x,1.9.3 to matrix)
+- set execute bit on test_file
+- do not display wget progress
+- Pass rabbit_user to cinder on controller node
+- add nova-volume class.
+- Make Horizon installation optional
 * 2012-11-02 1.0.0
 - add basic quantum support
 - replace nova-volumes with cinder
